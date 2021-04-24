@@ -1,0 +1,344 @@
+Spring data JPA
+	Spring Boot
+
+in spring boot there is a starter dependency 
+		spring data jpa
+
+spring (NOT BOOT)
+	jdbctemplate
+	hibernate template
+	dao support
+	entity manager
+
+Object Relational Mapping
+--------------------------
+	We identify the entities involved in the business: ex:	(CUSTOMER PURCHASE PRODUCT)
+	the nouns usually become the entities
+	CUSTOMER	
+	PRODUCT
+	The relationship between customer and product is Many to Many Hence the relationship also becomes an entity
+	Finally,
+		i) CUSTOMER
+		ii) PURCHASE
+		iii) PRODUCT
+	Entities become 
+		Tables (in the database)
+		Classes (in our java programs)
+
+but why?
+	in your project, i saw "select * from Employee"
+		this query will result in multiple records of Employees (0 more records)
+	how will you store the result in java program?
+		List<Employee>
+
+		you might think about ResultSet???????	
+		while(rs.next())
+	
+	but every component should be independent. in one layer, we have database related code. in another layer we are not supposed to have.
+	because, the roles of programmers are separated. One team will be doing DAO code
+	another team will create UI	(web / mobile/ windows/ console)
+	so UI team should write java code independent of any database.
+
+		List<Employee>
+
+	framework will take care of basic query operations. we do not need to write simple queries like
+		INSERT
+		UPDATE
+		DELETE
+		SELECT	all
+		SELECT by primary key column
+
+	the above queries will not be coded when we use frameworks like Hibernate, Spring Data JPA
+
+If f/w is going to take care of these operations, then f/w should understand our entity class first.
+	
+	Because, sometimes, entity class name might be Employee 		but table name can be EMP
+	entity class can be User.		but in db user is a keyword, table name can be USER_MASTER
+
+	How we can specify that the class name is mapped to table name? col name vs property name in java
+	data types, etc etc
+
+	that is where we have :
+		mapping xml file
+		annotations
+
+Spring data jpa fw will automatically put _ wherever a new word is found
+		companyName
+		"N" is captial in java, so spring data understands that a new word begins with N
+		COMPANY_NAME
+
+
+Entity class
+	this is going to become table in the database	(mapped to a table)
+	@Entity
+	@Id			primary key
+	@GeneratedValue		used to specify auto generate strategy
+	
+	@Table			to specify the table name when it is same or different from entity class
+	@Column			optional to specify the column name for a particular property 
+
+DaoImplementation
+	Dao interface
+	DaoImpl 
+
+Now, the approach is slightly changed 
+	there are 2 ways we can do ORM
+	i) mapping xml file
+	ii) annotations
+
+	1) entity class		(here, we map class to table (orm). )
+	2) 
+
+
+fw will create the table automatically 
+
+class Engineer
+{
+	private Long engineerId;
+	private String firstName;
+	private String lastName;
+	private String address;	
+}
+
+1) Spring Boot application
+	i) Spring Tool Suite?
+	ii) Eclipse?
+
+2) we create a spring boot starter project		
+	spring web	(because i want to see output in browser or postman)
+	data jpa 	(i will add dependency)
+
+3) set up the connection properties
+	application.properties
+	
+
+4) jpa repository is a super interface, which we are going to inherit
+
+
+@Controller
+	
+	the methods usually return "url"
+
+you used controller, when you created MVC project (either using spring boot or just spring)
+	you would have specified "prefix" "suffix"
+	even in controller, the methods can return response body using @ResponseBody
+
+
+
+@RestController
+	every method can return response body	(no need to mention @ResponseBody)
+	a rest controller method can have return type as 
+		void
+		any type (except Object)
+
+	consumes
+	produces
+		in spring boot we do not need to use the above. it is automatically choosen in some specific sequence
+		JSON is considered as the preferred content type
+
+
+
+
+=======================================================
+1) in pom.xml
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+
+2) in application.properties
+	
+spring.datasource.url=jdbc:mysql://localhost:3306/jf003
+spring.datasource.username=root
+spring.datasource.password=
+
+spring.datasource.hikari.connection-timeout=20000
+spring.datasource.hikari.minimum-idle=5
+spring.datasource.hikari.maximum-pool-size=12
+spring.datasource.hikari.idle-timeout=300000
+spring.datasource.hikari.max-lifetime=1200000
+
+spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.MySQL5Dialect
+spring.jpa.properties.hibernate.id.new_generator_mappings = false
+spring.jpa.properties.hibernate.format_sql = false
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+
+
+//-------------
+3)
+
+package com.example.demo.entity;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
+public class Engineer {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)	//auto generation is possible only for Integer and Long
+	private Long engineerId;
+	private String firstName;
+	private String lastName;
+	private String address;
+	public Engineer(Long engineerId, String firstName, String lastName, String address) {
+		super();
+		this.engineerId = engineerId;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.address = address;
+	}	
+	public Engineer() {}
+	public Long getEngineerId() {
+		return engineerId;
+	}
+	public void setEngineerId(Long engineerId) {
+		this.engineerId = engineerId;
+	}
+	public String getFirstName() {
+		return firstName;
+	}
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+	public String getLastName() {
+		return lastName;
+	}
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	@Override
+	public String toString() {
+		return "Engineer [engineerId=" + engineerId + ", firstName=" + firstName + ", lastName=" + lastName
+				+ ", address=" + address + "]";
+	}
+	
+}
+
+
+4) 
+
+package com.example.demo.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.example.demo.entity.Engineer;
+
+@Repository
+public interface EngineerRepository extends JpaRepository<Engineer, Long>
+{
+
+}
+
+
+5) 
+package com.example.demo.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.example.demo.entity.Engineer;
+import com.example.demo.repository.EngineerRepository;
+
+@Component
+public class EngineerService {
+
+	@Autowired
+	private EngineerRepository erepo;
+	public Engineer create(Engineer engineer)
+	{
+		return erepo.save(engineer);
+	}
+	public List<Engineer> read()
+	{
+		return erepo.findAll();
+	}
+	public Engineer read(Long engineerId)
+	{
+		return erepo.findById(engineerId).get();
+	}
+	public Engineer update(Engineer engineer)
+	{
+		return create(engineer);
+	}
+	public void delete(Long engineerId)
+	{
+		
+		erepo.delete(read(engineerId));
+	}
+	
+}
+
+
+6) 
+package com.example.demo.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.entity.Engineer;
+import com.example.demo.service.EngineerService;
+
+@RestController
+public class EngineerController {
+
+	@Autowired
+	private EngineerService es;
+	@GetMapping("/")
+	public List<Engineer> read()
+	{
+		return es.read();
+	}
+	
+	@GetMapping("/{engineerId}")
+	public Engineer read(@PathVariable("engineerId")Long engineerId)
+	{
+		return es.read(engineerId);
+	}
+	
+	@PostMapping("/")
+	public Engineer create(@RequestBody Engineer engineer)
+	{
+		return es.create(engineer);
+	}
+	
+	@PutMapping("/")
+	public Engineer update(@RequestBody Engineer engineer)
+	{
+		return es.update(engineer);
+	}
+	
+	@DeleteMapping("/{engineerId}")
+	public void delete(@PathVariable("engineerId") Long engineerId)
+	{
+		es.delete(engineerId);
+	}
+}
